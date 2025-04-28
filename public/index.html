@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image to URL - Catbox Upload</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
+        input[type="file"] { margin-bottom: 10px; }
+        button { padding: 10px 20px; font-size: 16px; }
+        #result { margin-top: 20px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Upload Image to Get URL</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" id="fileInput" accept="image/*,video/*" required><br>
+        <button type="submit">Upload</button>
+    </form>
+    <div id="result"></div>
+</div>
+
+<script>
+document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+    if (!file) return alert('Please select a file');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    document.getElementById('result').innerHTML = 'Uploading...';
+
+    try {
+        const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await res.json();
+        if (data.url) {
+            document.getElementById('result').innerHTML = `
+                <p><strong>URL:</strong> <a href="${data.url}" target="_blank">${data.url}</a></p>
+                <p><strong>Size:</strong> ${data.size}</p>
+            `;
+        } else {
+            document.getElementById('result').innerHTML = 'Failed to upload.';
+        }
+    } catch (err) {
+        document.getElementById('result').innerHTML = 'Error uploading.';
+        console.error(err);
+    }
+});
+</script>
+</body>
+</html>
