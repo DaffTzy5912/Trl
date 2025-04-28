@@ -2,13 +2,125 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Image to URL - Catbox Upload</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to URL</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
-        input[type="file"] { margin-bottom: 10px; }
-        button { padding: 10px 20px; font-size: 16px; }
-        #result { margin-top: 20px; }
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 20%, transparent 20%);
+            transform: rotate(45deg);
+            animation: lightEffect 10s infinite linear;
+        }
+
+        @keyframes lightEffect {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #444;
+            position: relative;
+            z-index: 1;
+        }
+
+        input[type="file"] {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            width: 100%;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="file"]:hover {
+            border-color: #ff7f50;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            color: white;
+            background: linear-gradient(135deg, #ff7f50, #ff4500);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #ff4500, #ff7f50);
+        }
+
+        #result {
+            margin-top: 20px;
+            text-align: left;
+            position: relative;
+            z-index: 1;
+        }
+
+        #result a {
+            color: #ff7f50;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        #result a:hover {
+            color: #ff4500;
+        }
+
+        .copy-btn {
+            margin-left: 10px;
+            padding: 5px 10px;
+            font-size: 14px;
+            color: white;
+            background: linear-gradient(135deg, #00bfff, #1e90ff);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: linear-gradient(135deg, #1e90ff, #00bfff);
+        }
     </style>
 </head>
 <body>
@@ -31,7 +143,7 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
     const formData = new FormData();
     formData.append('file', file);
 
-    document.getElementById('result').innerHTML = 'Uploading...';
+    document.getElementById('result').innerHTML = '<p>Uploading...</p>';
 
     try {
         const res = await fetch('/api/upload', {
@@ -42,17 +154,28 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
         const data = await res.json();
         if (data.url) {
             document.getElementById('result').innerHTML = `
-                <p><strong>URL:</strong> <a href="${data.url}" target="_blank">${data.url}</a></p>
+                <p><strong>URL:</strong> 
+                    <a href="${data.url}" target="_blank">${data.url}</a>
+                    <button class="copy-btn" onclick="copyToClipboard('${data.url}')">Copy Link</button>
+                </p>
                 <p><strong>Size:</strong> ${data.size}</p>
             `;
         } else {
-            document.getElementById('result').innerHTML = 'Failed to upload.';
+            document.getElementById('result').innerHTML = '<p>Failed to upload.</p>';
         }
     } catch (err) {
-        document.getElementById('result').innerHTML = 'Error uploading.';
+        document.getElementById('result').innerHTML = '<p>Error uploading.</p>';
         console.error(err);
     }
 });
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Link copied to clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy text: ', err);
+    });
+}
 </script>
 </body>
 </html>
